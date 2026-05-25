@@ -1,8 +1,3 @@
-bash
-
-cat /home/claude/salescoach-ai/src/app/api/practice/route.ts
-Output
-
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 
