@@ -1,7 +1,10 @@
+bash
+
+cat /home/claude/salescoach-ai/src/app/api/practice/route.ts
+Output
+
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
-
-const openai = new OpenAI({ apiKey: process.env.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});
 
 const PERSONA_PROMPTS: Record<string, string> = {
   skeptic: `You are a skeptical B2B buyer in a sales call. You doubt every claim, ask for proof and data, and are hard to impress. 
@@ -21,6 +24,7 @@ const PERSONA_PROMPTS: Record<string, string> = {
 
 export async function POST(req: NextRequest) {
   try {
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
     const { persona, product, messages, action } = await req.json();
     const personaPrompt = PERSONA_PROMPTS[persona] || PERSONA_PROMPTS.skeptic;
 
