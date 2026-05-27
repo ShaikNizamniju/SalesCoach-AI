@@ -202,11 +202,20 @@ export default function Landing() {
             <button
               className="btn-primary"
               style={{ padding: "12px 20px", flexShrink: 0 }}
-              onClick={() => {
-                if (email.includes("@")) { setJoined(true); }
-              }}
-            >
-              {joined ? "✓ Joined!" : "Join waitlist"}
+              <button className="btn-ghost" onClick={() => {
+            const shareUrl = window.location.href;
+            if (navigator.share) {
+              navigator.share({ title: `My SalesCoach AI Report — ${result!.score}/100`, url: shareUrl });
+            } else {
+              navigator.clipboard?.writeText(shareUrl);
+              alert("Link copied! Share it anywhere.");
+            }
+          }}>Share report 🔗</button>
+          <button className="btn-ghost" onClick={() => {
+            const text = `My SalesCoach AI Report\nScore: ${result!.score}/100\n\nLost moment: ${result!.lostMoment.reason}\n\nBetter script:\n${result!.betterScript}`;
+            navigator.clipboard?.writeText(text);
+            alert("Report copied to clipboard!");
+          }}>Copy report</button>
             </button>
           </div>
         </div>
