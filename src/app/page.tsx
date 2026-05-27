@@ -36,6 +36,9 @@ export default function Landing() {
         <span style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: 17, letterSpacing: "-0.02em" }}>
           SalesCoach<span style={{ color: "var(--accent)" }}>AI</span>
         </span>
+        <Link href="/pricing">
+            <button className="btn-ghost" style={{ padding: "9px 22px", fontSize: 13 }}>Pricing</button>
+          </Link>
         <Link href="/analyze">
           <button className="btn-primary" style={{ padding: "9px 22px", fontSize: 13 }}>Analyze a call</button>
         </Link>
