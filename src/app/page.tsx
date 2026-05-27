@@ -167,6 +167,7 @@ export default function Landing() {
       </section>
 
       {/* CTA */}
+      {/* CTA */}
       <section style={{
         padding: "80px 40px", textAlign: "center",
         borderTop: "1px solid var(--border)",
@@ -178,6 +179,38 @@ export default function Landing() {
           First analysis is free. No sign-up required.
         </p>
         <Link href="/analyze">
+          <button className="btn-primary" style={{ fontSize: 16, padding: "16px 40px", marginBottom: 32 }}>
+            Upload your call now →
+          </button>
+        </Link>
+        <div style={{ maxWidth: 440, margin: "0 auto" }}>
+          <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 14 }}>
+            Get weekly sales coaching tips — free
+          </p>
+          <div style={{ display: "flex", gap: 10 }}>
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="your@email.com"
+              style={{
+                flex: 1, background: "var(--surface)", border: "1px solid var(--border2)",
+                borderRadius: 8, padding: "12px 16px", color: "var(--text)",
+                fontSize: 14, outline: "none",
+              }}
+            />
+            <button
+              className="btn-primary"
+              style={{ padding: "12px 20px", flexShrink: 0 }}
+              onClick={() => {
+                if (email.includes("@")) { setJoined(true); }
+              }}
+            >
+              {joined ? "✓ Joined!" : "Join waitlist"}
+            </button>
+          </div>
+        </div>
+      </section>
           <button className="btn-primary" style={{ fontSize: 16, padding: "16px 40px" }}>
             Upload your call now →
           </button>
