@@ -50,4 +50,28 @@ Return ONLY valid JSON (no markdown, no backticks) with this exact structure:
     "excerpt": "<exact quote from transcript where prospect disengaged, max 2 sentences>",
     "reason": "<why this specific moment killed the deal, 1-2 sentences>"
   },
-  "betterScript"
+  "betterScript": "<rewritten version of what the rep should have said, 3-5 sentences>",
+  "topMistakes": ["<mistake 1>", "<mistake 2>", "<mistake 3>"],
+  "strengths": ["<strength 1>", "<strength 2>"],
+  "transcript": "<full transcript text>"
+}`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: analysisPrompt }],
+      temperature: 0.3,
+      max_tokens: 1500,
+    });
+
+    const raw = completion.choices[0]?.message?.content || "";
+    const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    const result = JSON.parse(cleaned);
+    result.transcript = transcript;
+
+    return NextResponse.json(result);
+  } catch (error: unknown) {
+    console.error("Analysis error:", error);
+    const msg = error instanceof Error ? error.message : "Analysis failed";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+}
