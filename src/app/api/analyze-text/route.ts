@@ -15,9 +15,11 @@ export async function POST(req: NextRequest) {
       temperature: 0.3,
       max_tokens: 1500,
     });
-    const raw = completion.choices[0]?.message?.content || "";
-    const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-    const result = JSON.parse(cleaned);
+   const raw = completion.choices[0]?.message?.content || "";
+const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+if (!jsonMatch) throw new Error("AI returned invalid response. Please try again.");
+const result = JSON.parse(jsonMatch[0]);
     result.transcript = transcript;
     return NextResponse.json(result);
   } catch (error: unknown) {
