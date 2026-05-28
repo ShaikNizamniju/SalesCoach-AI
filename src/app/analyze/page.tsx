@@ -69,7 +69,9 @@ export default function AnalyzePage() {
       router.push("/results?data=" + encodeURIComponent(JSON.stringify(data)));
     } catch (e: unknown) {
       setStage("error");
-      setError(e instanceof Error ? e.message : "Analysis failed. Please try again.");
+      setError(e instanceof Error && e.message.includes("fetch") 
+  ? "Audio upload failed on mobile. Please use the 'Paste Transcript' tab instead — it works perfectly on mobile!" 
+  : e instanceof Error ? e.message : "Analysis failed. Please try again.");
     }
   };
 
