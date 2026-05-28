@@ -14,9 +14,7 @@ const stageLabels: Record<Stage, string> = {
 };
 
 export default function AnalyzePage() {
-  const [tab, setTab] = useState<Tab>(
-  typeof window !== "undefined" && window.innerWidth < 768 ? "text" : "audio"
-);
+  const [tab, setTab] = useState<Tab>("audio");
   const [file, setFile] = useState<File | null>(null);
   const [transcript, setTranscript] = useState("");
   const [stage, setStage] = useState<Stage>("idle");
@@ -58,20 +56,17 @@ export default function AnalyzePage() {
       setStage("analysing");
       const data = await res.json();
       setStage("done");
-
-      // Save to history
       try {
+        sessionStorage.setItem("salescoach_result", JSON.stringify(data));
         const history = JSON.parse(localStorage.getItem("salescoach_history") || "[]");
         history.unshift({ ...data, date: new Date().toISOString(), id: Date.now() });
         localStorage.setItem("salescoach_history", JSON.stringify(history.slice(0, 20)));
       } catch {}
-
-      router.push("/results?data=" + encodeURIComponent(JSON.stringify(data)));
+      router.push("/results");
     } catch (e: unknown) {
       setStage("error");
-      setError(e instanceof Error && e.message.includes("fetch") 
-  ? "Audio upload failed on mobile. Please use the 'Paste Transcript' tab instead — it works perfectly on mobile!" 
-  : e instanceof Error ? e.message : "Analysis failed. Please try again.");
+      const msg = e instanceof Error ? e.message : "Analysis failed";
+      setError(msg.includes("fetch") ? "Audio upload failed on mobile. Please use the 'Paste Transcript' tab instead — it works perfectly on mobile!" : msg);
     }
   };
 
@@ -95,36 +90,23 @@ export default function AnalyzePage() {
           <p style={{ color: "var(--muted2)", fontSize: 16 }}>Upload a recording or paste a transcript — get your breakdown in 30 seconds.</p>
         </div>
 
-        {/* TABS */}
         <div className="fade-up-1" style={{ display: "flex", gap: 4, background: "var(--surface)", borderRadius: 10, padding: 4, marginBottom: 24, border: "1px solid var(--border)" }}>
           {(["audio", "text"] as Tab[]).map((t) => (
             <button key={t} onClick={() => { setTab(t); setError(""); }}
-              style={{
-                flex: 1, padding: "10px", borderRadius: 8, border: "none", cursor: "pointer",
-                fontFamily: "Syne, sans-serif", fontWeight: 600, fontSize: 13,
-                background: tab === t ? "var(--accent)" : "transparent",
-                color: tab === t ? "#000" : "var(--muted2)",
-                transition: "all 0.2s",
-              }}>
+              style={{ flex: 1, padding: "10px", borderRadius: 8, border: "none", cursor: "pointer", fontFamily: "Syne, sans-serif", fontWeight: 600, fontSize: 13, background: tab === t ? "var(--accent)" : "transparent", color: tab === t ? "#000" : "var(--muted2)", transition: "all 0.2s" }}>
               {t === "audio" ? "🎙️ Upload Audio" : "📝 Paste Transcript"}
             </button>
           ))}
         </div>
 
-        {/* AUDIO UPLOAD */}
         {tab === "audio" && !isLoading && (
           <div className="fade-up-1"
             onClick={() => inputRef.current?.click()}
             onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
             onDragLeave={() => setDrag(false)}
             onDrop={(e) => { e.preventDefault(); setDrag(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
-            style={{
-              border: "2px dashed " + (drag ? "var(--accent)" : file ? "rgba(0,229,160,0.4)" : "var(--border2)"),
-              borderRadius: 16, padding: "60px 32px", textAlign: "center", cursor: "pointer",
-              background: drag ? "rgba(0,229,160,0.04)" : "var(--surface)", transition: "all 0.2s",
-            }}>
-            <input ref={inputRef} type="file" accept=".mp3,.wav,.m4a,.mp4,audio/*" style={{ display: "none" }}
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
+            style={{ border: "2px dashed " + (drag ? "var(--accent)" : file ? "rgba(0,229,160,0.4)" : "var(--border2)"), borderRadius: 16, padding: "60px 32px", textAlign: "center", cursor: "pointer", background: drag ? "rgba(0,229,160,0.04)" : "var(--surface)", transition: "all 0.2s" }}>
+            <input ref={inputRef} type="file" accept=".mp3,.wav,.m4a,.mp4,audio/*" style={{ display: "none" }} onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
             {file ? (
               <>
                 <div style={{ fontSize: 40, marginBottom: 12 }}>🎵</div>
@@ -134,42 +116,28 @@ export default function AnalyzePage() {
             ) : (
               <>
                 <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(0,229,160,0.08)", border: "1px solid rgba(0,229,160,0.15)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.5">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-                  </svg>
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 </div>
                 <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 8 }}>Drop your call recording here</div>
                 <div style={{ fontSize: 14, color: "var(--muted2)" }}>or <span style={{ color: "var(--accent)" }}>click to browse</span></div>
-                <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 16 }}>MP3 · WAV · M4A · up to 4MB · On mobile? Use Paste Transcript ↑</div>
+                <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 16 }}>MP3 · WAV · M4A · up to 4MB · <span style={{ color: "var(--accent)" }}>On mobile? Use Paste Transcript ↑</span></div>
               </>
             )}
           </div>
         )}
 
-        {/* TEXT INPUT */}
         {tab === "text" && !isLoading && (
           <div className="fade-up-1">
-            <textarea
-              value={transcript}
-              onChange={(e) => setTranscript(e.target.value)}
-              placeholder={"Paste your sales call transcript here...\n\nExample:\nRep: Hi, is this a good time to talk?\nProspect: Sure, what's this about?\nRep: I wanted to share how our product..."}
-              style={{
-                width: "100%", minHeight: 280, background: "var(--surface)",
-                border: "1px solid var(--border2)", borderRadius: 12,
-                padding: "18px", color: "var(--text)", fontSize: 14,
-                lineHeight: 1.7, outline: "none", resize: "vertical",
-                fontFamily: "DM Sans, sans-serif", transition: "border 0.2s",
-              }}
+            <textarea value={transcript} onChange={(e) => setTranscript(e.target.value)}
+              placeholder={"Paste your sales call transcript here...\n\nExample:\nRep: Hi, is this a good time?\nProspect: Sure, what's this about?"}
+              style={{ width: "100%", minHeight: 280, background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 12, padding: "18px", color: "var(--text)", fontSize: 14, lineHeight: 1.7, outline: "none", resize: "vertical", fontFamily: "DM Sans, sans-serif", transition: "border 0.2s" }}
               onFocus={(e) => e.target.style.borderColor = "var(--accent)"}
               onBlur={(e) => e.target.style.borderColor = "var(--border2)"}
             />
-            <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 8 }}>
-              {transcript.length} characters · Minimum 50 required
-            </div>
+            <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 8 }}>{transcript.length} characters · Minimum 50 required</div>
           </div>
         )}
 
-        {/* LOADING */}
         {isLoading && (
           <div style={{ border: "1px solid var(--border2)", borderRadius: 16, padding: "60px 32px", textAlign: "center", background: "var(--surface)" }}>
             <div style={{ width: 56, height: 56, borderRadius: "50%", border: "3px solid var(--border2)", borderTopColor: "var(--accent)", animation: "spin 0.8s linear infinite", margin: "0 auto 24px" }} />
@@ -183,9 +151,7 @@ export default function AnalyzePage() {
         )}
 
         {error && (
-          <div style={{ background: "rgba(255,77,77,0.08)", border: "1px solid rgba(255,77,77,0.2)", borderRadius: 10, padding: "14px 18px", marginTop: 16, fontSize: 14, color: "#ff6b6b" }}>
-            ⚠️ {error}
-          </div>
+          <div style={{ background: "rgba(255,77,77,0.08)", border: "1px solid rgba(255,77,77,0.2)", borderRadius: 10, padding: "14px 18px", marginTop: 16, fontSize: 14, color: "#ff6b6b" }}>⚠️ {error}</div>
         )}
 
         {!isLoading && (
@@ -196,18 +162,14 @@ export default function AnalyzePage() {
               onClick={handleAnalyze}>
               Analyze this call →
             </button>
-            {(file || transcript) && (
-              <button className="btn-ghost" onClick={() => { setFile(null); setTranscript(""); setError(""); }}>Clear</button>
-            )}
+            {(file || transcript) && <button className="btn-ghost" onClick={() => { setFile(null); setTranscript(""); setError(""); }}>Clear</button>}
           </div>
         )}
 
         <div style={{ marginTop: 40, padding: "20px 24px", background: "var(--surface)", borderRadius: 12, border: "1px solid var(--border)" }}>
           <div style={{ fontSize: 12, fontFamily: "Syne, sans-serif", fontWeight: 700, color: "var(--muted)", letterSpacing: "0.06em", marginBottom: 12 }}>TIPS FOR BEST RESULTS</div>
           {["Use calls where you can hear both speakers clearly", "Works best with calls 3–30 minutes long", "For transcripts: include Rep and Prospect labels if possible"].map(t => (
-            <div key={t} style={{ fontSize: 13, color: "var(--muted2)", marginBottom: 6, display: "flex", gap: 8 }}>
-              <span style={{ color: "var(--accent)" }}>↗</span>{t}
-            </div>
+            <div key={t} style={{ fontSize: 13, color: "var(--muted2)", marginBottom: 6, display: "flex", gap: 8 }}><span style={{ color: "var(--accent)" }}>↗</span>{t}</div>
           ))}
         </div>
       </div>
