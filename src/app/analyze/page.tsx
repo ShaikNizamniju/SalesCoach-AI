@@ -62,7 +62,7 @@ export default function AnalyzePage() {
         history.unshift({ ...data, date: new Date().toISOString(), id: Date.now() });
         localStorage.setItem("salescoach_history", JSON.stringify(history.slice(0, 20)));
       } catch {}
-      router.push("/results");
+      window.location.href = "/results";
     } catch (e: unknown) {
       setStage("error");
       const msg = e instanceof Error ? e.message : "Analysis failed";
