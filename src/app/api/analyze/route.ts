@@ -14,6 +14,7 @@ export async function POST(req: NextRequest) {
       messages: [{ role: "user", content: prompt }],
       temperature: 0.3,
       max_tokens: 1500,
+      response_format: { type: "json_object" },
     });
     const raw = completion.choices[0]?.message?.content || "";
 const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
