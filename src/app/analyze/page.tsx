@@ -14,7 +14,9 @@ const stageLabels: Record<Stage, string> = {
 };
 
 export default function AnalyzePage() {
-  const [tab, setTab] = useState<Tab>("audio");
+  const [tab, setTab] = useState<Tab>(
+  typeof window !== "undefined" && window.innerWidth < 768 ? "text" : "audio"
+);
   const [file, setFile] = useState<File | null>(null);
   const [transcript, setTranscript] = useState("");
   const [stage, setStage] = useState<Stage>("idle");
