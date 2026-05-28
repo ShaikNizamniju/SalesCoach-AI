@@ -56,7 +56,19 @@ export default function AnalyzePage() {
         throw new Error(err.error || "Analysis failed");
       }
       setStage("analysing");
-      const data = await res.json();
+      const raw = await res.json();
+      const data = {
+        score: typeof raw.score === "number" ? raw.score : 0,
+        grade: raw.grade || "Needs Work",
+        summary: raw.summary || "Analysis complete.",
+        lostMoment: raw.lostMoment && typeof raw.lostMoment === "object"
+          ? { timestamp: raw.lostMoment.timestamp || "", excerpt: raw.lostMoment.excerpt || "", reason: raw.lostMoment.reason || "" }
+          : { timestamp: "", excerpt: "No specific lost moment identified.", reason: "The call did not have one clear turning point." },
+        betterScript: raw.betterScript || "No specific suggestion available.",
+        topMistakes: Array.isArray(raw.topMistakes) ? raw.topMistakes : [],
+        strengths: Array.isArray(raw.strengths) ? raw.strengths : [],
+        transcript: raw.transcript || "",
+      };
       try {
         const history = JSON.parse(localStorage.getItem("salescoach_history") || "[]");
         history.unshift({ ...data, date: new Date().toISOString(), id: Date.now() });
@@ -75,7 +87,7 @@ export default function AnalyzePage() {
 
   const shareToLinkedIn = () => {
     if (!result) return;
-    const text = "Just analyzed a sales call with SalesCoach AI 🎯\nScore: " + result.score + "/100\nLost moment: \"" + result.lostMoment.excerpt + "\"\nTry it free: https://sales-coach-ai-pi.vercel.app\n#SalesCoachAI #OpenAIHackathon";
+    const text = "Just analyzed a sales call with SalesCoach AI 🎯\nScore: " + result.score + "/100\nLost moment: \"" + result.lostMoment?.excerpt + "\"\nTry it free: https://sales-coach-ai-pi.vercel.app\n#SalesCoachAI #OpenAIHackathon";
     window.open("https://www.linkedin.com/sharing/share-offsite/?url=https://sales-coach-ai-pi.vercel.app&summary=" + encodeURIComponent(text), "_blank");
   };
 
@@ -186,10 +198,10 @@ export default function AnalyzePage() {
             <div style={{ background: "rgba(255,77,77,0.05)", border: "1px solid rgba(255,77,77,0.2)", borderRadius: 14, padding: "22px", marginBottom: 16 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                 <span style={{ background: "rgba(255,77,77,0.15)", borderRadius: 6, padding: "4px 10px", fontSize: 11, fontFamily: "Syne, sans-serif", fontWeight: 700, color: "#ff6b6b" }}>⚠ DEAL LOST HERE</span>
-                <span style={{ fontSize: 11, color: "var(--muted)" }}>{result.lostMoment.timestamp}</span>
+                <span style={{ fontSize: 11, color: "var(--muted)" }}>{result.lostMoment?.timestamp}</span>
               </div>
-              <div style={{ fontStyle: "italic", color: "var(--muted2)", fontSize: 13, borderLeft: "3px solid rgba(255,77,77,0.4)", paddingLeft: 14, lineHeight: 1.7, marginBottom: 12 }}>"{result.lostMoment.excerpt}"</div>
-              <div style={{ fontSize: 13, lineHeight: 1.6 }}><span style={{ fontWeight: 500, color: "#ff6b6b" }}>Why: </span>{result.lostMoment.reason}</div>
+              <div style={{ fontStyle: "italic", color: "var(--muted2)", fontSize: 13, borderLeft: "3px solid rgba(255,77,77,0.4)", paddingLeft: 14, lineHeight: 1.7, marginBottom: 12 }}>"{result.lostMoment?.excerpt}"</div>
+              <div style={{ fontSize: 13, lineHeight: 1.6 }}><span style={{ fontWeight: 500, color: "#ff6b6b" }}>Why: </span>{result.lostMoment?.reason}</div>
             </div>
 
             <div style={{ background: "rgba(0,229,160,0.04)", border: "1px solid rgba(0,229,160,0.2)", borderRadius: 14, padding: "22px", marginBottom: 16 }}>
@@ -200,11 +212,11 @@ export default function AnalyzePage() {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
               <div className="card">
                 <div style={{ fontSize: 11, fontFamily: "Syne, sans-serif", fontWeight: 700, color: "#ff6b6b", marginBottom: 12 }}>TOP MISTAKES</div>
-                {result.topMistakes.map((m, i) => <div key={i} style={{ fontSize: 12, color: "var(--muted2)", marginBottom: 8, display: "flex", gap: 6 }}><span style={{ color: "#ff6b6b" }}>{i+1}.</span>{m}</div>)}
+                {(result.topMistakes || []).map((m, i) => <div key={i} style={{ fontSize: 12, color: "var(--muted2)", marginBottom: 8, display: "flex", gap: 6 }}><span style={{ color: "#ff6b6b" }}>{i+1}.</span>{m}</div>)}
               </div>
               <div className="card">
                 <div style={{ fontSize: 11, fontFamily: "Syne, sans-serif", fontWeight: 700, color: "var(--accent)", marginBottom: 12 }}>WHAT WORKED</div>
-                {result.strengths.map((s, i) => <div key={i} style={{ fontSize: 12, color: "var(--muted2)", marginBottom: 8, display: "flex", gap: 6 }}><span style={{ color: "var(--accent)" }}>✓</span>{s}</div>)}
+                {(result.strengths || []).map((s, i) => <div key={i} style={{ fontSize: 12, color: "var(--muted2)", marginBottom: 8, display: "flex", gap: 6 }}><span style={{ color: "var(--accent)" }}>✓</span>{s}</div>)}
               </div>
             </div>
 
