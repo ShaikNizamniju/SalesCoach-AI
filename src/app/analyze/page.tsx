@@ -138,7 +138,7 @@ export default function AnalyzePage() {
                 </div>
                 <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 8 }}>Drop your call recording here</div>
                 <div style={{ fontSize: 14, color: "var(--muted2)" }}>or <span style={{ color: "var(--accent)" }}>click to browse</span></div>
-                <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 16 }}>MP3 · WAV · M4A · up to 25MB</div>
+                <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 16 }}>MP3 · WAV · M4A · up to 4MB · On mobile? Use Paste Transcript ↑</div>
               </>
             )}
           </div>
